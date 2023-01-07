@@ -1,0 +1,17 @@
+version: "3"
+
+vars:
+  BINARY_NAME: mover{{exeExt}}
+
+tasks:
+  run:
+    cmds:
+      - task: build
+      - ./{{.BINARY_NAME}}
+    silent: true
+  build:
+    cmds:
+      - echo 'building for {{OS}} {{ARCH}}'
+      - golangci-lint run
+      - go build -o="./{{.BINARY_NAME}}" .
+    silent: true
