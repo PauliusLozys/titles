@@ -76,13 +76,22 @@ func moveFiles(list []File, outputDir string, dryRun bool) {
 func parseFile(file *File) (string, error) {
 	name := file.UnparsedName
 	title := title.FindString(name)
-	sea := season.FindString(title) // Extracted: S1E01/S1
-	if strings.TrimSpace(sea) == "" {
+	sea := season.FindString(title) // Extracted: S1E01/S1/Season 1
+	seaNum := strings.ToLower(sea)
+
+	if strings.Contains(seaNum, "season") { // Season 1
+		seaNum = strings.TrimSpace(strings.TrimPrefix(seaNum, "season"))
+
+	} else if strings.TrimSpace(seaNum) == "" { // no season
 		// Episodes that don't have a season specified
 		// will default to 1. This is usually related to anime episodes.
-		sea = "S1"
+		seaNum = "1"
+
+	} else { // S1
+		seaNum = seaNum[1:]
 	}
-	seasonNum, err := strconv.Atoi(sea[1:])
+
+	seasonNum, err := strconv.Atoi(seaNum)
 	if err != nil {
 		return "", err
 	}

@@ -1,7 +1,7 @@
 version: "3"
 
 vars:
-  BINARY_NAME: mover{{exeExt}}
+  BINARY_NAME: titles{{exeExt}}
 
 tasks:
   run:
@@ -15,3 +15,6 @@ tasks:
       - golangci-lint run
       - go build -o="./{{.BINARY_NAME}}" .
     silent: true
+  install:
+    cmds:
+      - go install

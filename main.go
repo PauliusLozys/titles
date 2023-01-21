@@ -21,7 +21,7 @@ var (
 
 	tt       = cases.Title(language.English)
 	title    = regexp.MustCompile(`( .+\s?-\s?\d+|.+[sS]\d+([eE]\d{1,2}))`)
-	season   = regexp.MustCompile(`[sS]\d+`)
+	season   = regexp.MustCompile(`(([sS]eason\s)|[sS])\d+`)
 	episode  = regexp.MustCompile(`(\s?-\s?\d+|[eE]\d+)`)
 	replacer = strings.NewReplacer(".", " ", "_", " ", "-", " ")
 )
