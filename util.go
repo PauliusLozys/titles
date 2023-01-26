@@ -24,6 +24,6 @@ func createFolderIfNeeded(path string, dryRun bool) {
 	}
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		// No folder
-		panicOnError(os.Mkdir(path, 0755))
+		panicOnError(os.MkdirAll(path, 0755))
 	}
 }
