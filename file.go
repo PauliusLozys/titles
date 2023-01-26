@@ -96,7 +96,12 @@ func parseFile(file *File) (string, error) {
 		return "", err
 	}
 	file.Season = seasonNum
-	lastIndex := strings.Index(title, sea)
+
+	lastIndex := -1
+	if strings.TrimSpace(sea) != "" {
+		lastIndex = strings.Index(title, sea)
+	}
+
 	if lastIndex == -1 {
 		ep := episode.FindStringIndex(title)
 		if len(ep) == 0 {
