@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+const maxIterations = 50
+
 type File struct {
 	ParsedName   string
 	UnparsedName string
@@ -46,7 +48,7 @@ func collectAllFiles(startDir string, blacklistedDirs, extensions []string, recu
 }
 
 func moveFiles(list []File, outputDir string, dryRun bool) {
-	organized := make(map[string][]File)
+	organized := make(map[string][]File, len(list))
 	for _, file := range list {
 		organized[file.ParsedName] = append(organized[file.ParsedName], file)
 	}
@@ -62,20 +64,33 @@ func moveFiles(list []File, outputDir string, dryRun bool) {
 			seasonFolder := filepath.Join(showFolder, season)
 			createFolderIfNeeded(seasonFolder, dryRun) // create folder for season, if needed
 			finalPath := filepath.Join(seasonFolder, file.UnparsedName)
+			if !dryRun {
+				if err := os.Rename(file.FilePath, finalPath); err != nil {
+					fmt.Println("ERROR: moving files:", err)
+					continue
+				}
+			}
 			fmt.Println("Moved to:", finalPath)
-			if dryRun {
-				continue
-			}
-			if err := os.Rename(file.FilePath, finalPath); err != nil {
-				fmt.Println("ERROR: moving files:", err)
-			}
 		}
 	}
 }
 
-func parseFile(file *File) (string, error) {
-	name := file.UnparsedName
-	title := title.FindString(name)
+func cleanUpBrackets(fileName string) string {
+	for i := 0; i < maxIterations; i++ {
+		s := strings.IndexRune(fileName, '[')
+		f := strings.IndexRune(fileName, ']')
+		if s == -1 || f == -1 || s > f {
+			return fileName
+		}
+		fileName = fileName[:s] + fileName[f+1:]
+	}
+	return fileName // should be unreachable
+}
+
+func parseFile(unparsedName string) (string, int, error) {
+	cleanedUpName := cleanUpBrackets(unparsedName)
+	rawName := cleanedUpName
+	title := title.FindString(rawName)
 	sea := season.FindString(title) // Extracted: S1E01/S1/Season 1
 	seaNum := strings.ToLower(sea)
 
@@ -93,9 +108,8 @@ func parseFile(file *File) (string, error) {
 
 	seasonNum, err := strconv.Atoi(seaNum)
 	if err != nil {
-		return "", err
+		return "", -1, err
 	}
-	file.Season = seasonNum
 
 	lastIndex := -1
 	if strings.TrimSpace(sea) != "" {
@@ -105,10 +119,10 @@ func parseFile(file *File) (string, error) {
 	if lastIndex == -1 {
 		ep := episode.FindStringIndex(title)
 		if len(ep) == 0 {
-			return "", errors.New("no seasons/episodes found in anime title string")
+			return "", -1, errors.New("no seasons/episodes found in anime title string")
 		}
 		lastIndex = ep[0]
 	}
 	title = replacer.Replace(title[:lastIndex])
-	return strings.Trim(title, " -]"), nil
+	return strings.Trim(title, " -]"), seasonNum, nil
 }

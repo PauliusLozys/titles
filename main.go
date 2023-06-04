@@ -38,11 +38,12 @@ func main() {
 
 	for i := range list {
 		if title.MatchString(list[i].UnparsedName) {
-			title, err := parseFile(&list[i])
+			title, seasonNum, err := parseFile(list[i].UnparsedName)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				continue
 			}
+			list[i].Season = seasonNum
 			list[i].ParsedName = tt.String(title)
 			continue
 		}
