@@ -39,6 +39,10 @@ func TestParseFile(t *testing.T) {
 			expected:      &titles.Title{Name: "The Flash 2014", Season: 9, Episode: 11, Quality: "1080p"},
 		},
 		{
+			unparsedTitle: "Knight Rider S01 1080p BluRay x265",
+			expected:      &titles.Title{Name: "Knight Rider", Season: 1, Episode: 1, Quality: "1080p"},
+		},
+		{
 			unparsedTitle: "Doom.Patrol.1080p.HEVC.x265-MeGusta[eztv.re].mkv",
 			expected:      nil,
 			err:           errors.New("no seasons/episodes found when parsing title"),

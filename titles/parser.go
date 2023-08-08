@@ -13,7 +13,7 @@ import (
 // Default configurations.
 var (
 	DefaultTitleCase    = cases.Title(language.English)
-	DefaultTitleRegex   = regexp.MustCompile(`( .+\s?-\s?\d+|.+[sS]\d+([eE]\d{1,2}))`)
+	DefaultTitleRegex   = regexp.MustCompile(`( .+\s?-\s?\d+|.+[sS]\d+([eE]\d{1,2}))|.+[sS]\d+`)
 	DefaultSeasonRegex  = regexp.MustCompile(`(([sS]eason\s)|[sS])\d+`)
 	DefaultEpisodeRegex = regexp.MustCompile(`(\s?-\s?\d+|[eE]\d+)`)
 	DefaultQualityRegex = regexp.MustCompile(`(1080|720|480)p`)
