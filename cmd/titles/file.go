@@ -1,12 +1,10 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
 	"strings"
 )
 
@@ -73,56 +71,4 @@ func moveFiles(list []File, outputDir string, dryRun bool) {
 			fmt.Println("Moved to:", finalPath)
 		}
 	}
-}
-
-func cleanUpBrackets(fileName string) string {
-	for i := 0; i < maxIterations; i++ {
-		s := strings.IndexRune(fileName, '[')
-		f := strings.IndexRune(fileName, ']')
-		if s == -1 || f == -1 || s > f {
-			return fileName
-		}
-		fileName = fileName[:s] + fileName[f+1:]
-	}
-	return fileName // should be unreachable
-}
-
-func parseFile(unparsedName string) (string, int, error) {
-	cleanedUpName := cleanUpBrackets(unparsedName)
-	rawName := cleanedUpName
-	title := title.FindString(rawName)
-	sea := season.FindString(title) // Extracted: S1E01/S1/Season 1
-	seaNum := strings.ToLower(sea)
-
-	if strings.Contains(seaNum, "season") { // Season 1
-		seaNum = strings.TrimSpace(strings.TrimPrefix(seaNum, "season"))
-
-	} else if strings.TrimSpace(seaNum) == "" { // no season
-		// Episodes that don't have a season specified
-		// will default to 1. This is usually related to anime episodes.
-		seaNum = "1"
-
-	} else { // S1
-		seaNum = seaNum[1:]
-	}
-
-	seasonNum, err := strconv.Atoi(seaNum)
-	if err != nil {
-		return "", -1, err
-	}
-
-	lastIndex := -1
-	if strings.TrimSpace(sea) != "" {
-		lastIndex = strings.Index(title, sea)
-	}
-
-	if lastIndex == -1 {
-		ep := episode.FindStringIndex(title)
-		if len(ep) == 0 {
-			return "", -1, errors.New("no seasons/episodes found in anime title string")
-		}
-		lastIndex = ep[0]
-	}
-	title = replacer.Replace(title[:lastIndex])
-	return strings.Trim(title, " -]"), seasonNum, nil
 }

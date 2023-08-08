@@ -4,11 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
+	"github.com/PauliusLozys/titles/titles"
 )
 
 var (
@@ -18,12 +16,6 @@ var (
 	extensions      = flag.String("e", ".mkv,.mp4", "file extension to look for separated by ','")
 	recursive       = flag.Bool("r", false, "recursively search for all files")
 	dryRun          = flag.Bool("d", false, "do a dry run without affecting files")
-
-	tt       = cases.Title(language.English)
-	title    = regexp.MustCompile(`( .+\s?-\s?\d+|.+[sS]\d+([eE]\d{1,2}))`)
-	season   = regexp.MustCompile(`(([sS]eason\s)|[sS])\d+`)
-	episode  = regexp.MustCompile(`(\s?-\s?\d+|[eE]\d+)`)
-	replacer = strings.NewReplacer(".", " ", "_", " ", "-", " ")
 )
 
 func main() {
@@ -36,18 +28,21 @@ func main() {
 		*recursive,
 	)
 
+	parser := titles.NewParser()
+
 	for i := range list {
-		if title.MatchString(list[i].UnparsedName) {
-			title, seasonNum, err := parseFile(list[i].UnparsedName)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				continue
-			}
-			list[i].Season = seasonNum
-			list[i].ParsedName = tt.String(title)
+		if !titles.DefaultTitleRegex.MatchString(list[i].UnparsedName) {
+			fmt.Println("Unmatched file:", list[i].UnparsedName)
 			continue
 		}
-		fmt.Println("Unmatched file:", list[i].UnparsedName)
+
+		title, err := parser.ParseTitle(list[i].UnparsedName)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			continue
+		}
+		list[i].ParsedName = title.Name
+		list[i].Season = title.Season
 	}
 	moveFiles(list, *outputDir, *dryRun)
 }
