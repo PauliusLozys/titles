@@ -33,6 +33,12 @@ func WithEpisodeRegex(episodeRegex *regexp.Regexp) Option {
 	}
 }
 
+func WithQualityRegex(qualityRegex *regexp.Regexp) Option {
+	return func(tp *Parser) {
+		tp.qualityRegex = qualityRegex
+	}
+}
+
 func WithReplacer(replacer *strings.Replacer) Option {
 	return func(tp *Parser) {
 		tp.replacer = replacer
