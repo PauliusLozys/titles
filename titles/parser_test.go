@@ -47,6 +47,10 @@ func TestParseFile(t *testing.T) {
 			expected:      nil,
 			err:           errors.New("no seasons/episodes found when parsing title"),
 		},
+		{
+			unparsedTitle: "[Erai-raws] Kusuriya no Hitorigoto 2nd Season - 10 [1080p CR WEBRip HEVC EAC3][MultiSub][1F850592].mkv",
+			expected:      &titles.Title{Name: "Kusuriya No Hitorigoto", Season: 2, Episode: 10, Quality: "1080p"},
+		},
 	}
 
 	parser := titles.NewParser()

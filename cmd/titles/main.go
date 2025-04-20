@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -28,21 +28,34 @@ func main() {
 		*recursive,
 	)
 
+	if len(list) == 0 {
+		slog.Warn("No files were found")
+		os.Exit(0)
+	}
+
 	parser := titles.NewParser()
 
 	for i := range list {
 		if !titles.DefaultTitleRegex.MatchString(list[i].UnparsedName) {
-			fmt.Println("Unmatched file:", list[i].UnparsedName)
+			slog.Warn("Unmatched file", slog.String("file", list[i].UnparsedName))
+
 			continue
 		}
 
 		title, err := parser.ParseTitle(list[i].UnparsedName)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			slog.Error(
+				"Parsing title",
+				slog.String("title", list[i].UnparsedName),
+				slog.Any("err", err),
+			)
+
 			continue
 		}
+
 		list[i].ParsedName = title.Name
 		list[i].Season = title.Season
 	}
+
 	moveFiles(list, *outputDir, *dryRun)
 }

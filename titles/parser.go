@@ -14,29 +14,32 @@ import (
 var (
 	DefaultTitleCase    = cases.Title(language.English)
 	DefaultTitleRegex   = regexp.MustCompile(`( .+\s?-\s?\d+|.+[sS]\d+([eE]\d{1,2}))|.+[sS]\d+`)
-	DefaultSeasonRegex  = regexp.MustCompile(`(([sS]eason\s)|[sS])\d+`)
+	DefaultSeasonRegex  = regexp.MustCompile(`((([sS]eason\s)|[sS])\d+|\d+([NnRr]d) [sS]eason)`)
 	DefaultEpisodeRegex = regexp.MustCompile(`(\s?-\s?\d+|[eE]\d+)`)
 	DefaultQualityRegex = regexp.MustCompile(`(1080|720|480)p`)
 	DefaultReplacer     = strings.NewReplacer(".", " ", "_", " ", "-", " ")
+	SeasonReplacer      = strings.NewReplacer("nd", "", "rd", "", "season", "", " ", "")
 )
 
 type Parser struct {
-	titleCase    cases.Caser
-	titleRegex   *regexp.Regexp
-	seasonRegex  *regexp.Regexp
-	episodeRegex *regexp.Regexp
-	qualityRegex *regexp.Regexp
-	replacer     *strings.Replacer
+	titleCase      cases.Caser
+	titleRegex     *regexp.Regexp
+	seasonRegex    *regexp.Regexp
+	episodeRegex   *regexp.Regexp
+	qualityRegex   *regexp.Regexp
+	replacer       *strings.Replacer
+	seasonReplacer *strings.Replacer
 }
 
 func NewParser(opts ...Option) *Parser {
 	tp := &Parser{ // Preset parser with default configuration.
-		titleCase:    DefaultTitleCase,
-		titleRegex:   DefaultTitleRegex,
-		seasonRegex:  DefaultSeasonRegex,
-		episodeRegex: DefaultEpisodeRegex,
-		qualityRegex: DefaultQualityRegex,
-		replacer:     DefaultReplacer,
+		titleCase:      DefaultTitleCase,
+		titleRegex:     DefaultTitleRegex,
+		seasonRegex:    DefaultSeasonRegex,
+		episodeRegex:   DefaultEpisodeRegex,
+		qualityRegex:   DefaultQualityRegex,
+		replacer:       DefaultReplacer,
+		seasonReplacer: SeasonReplacer,
 	}
 	for _, opt := range opts {
 		opt(tp)
@@ -61,9 +64,11 @@ func (tp *Parser) ParseTitle(unparsedTitle string) (*Title, error) {
 	}
 
 	// Extract season number.
-	sea := tp.seasonRegex.FindString(title) // Extracted: S1E01/S1/Season 1
+	sea := tp.seasonRegex.FindString(title) // Extracted: S1E01/S1/Season 1/2nd Season
 	seasonStr := strings.ToLower(sea)
-	if strings.Contains(seasonStr, "season") { // Example: season 1
+	if strings.Contains(seasonStr, "nd season") || strings.Contains(seasonStr, "rd season") { // Example: 2nd /3rd Season.
+		seasonStr = tp.seasonReplacer.Replace(seasonStr)
+	} else if strings.Contains(seasonStr, "season") { // Example: season 1
 		seasonStr = strings.TrimSpace(strings.TrimPrefix(seasonStr, "season"))
 	} else if strings.TrimSpace(seasonStr) == "" { // no season
 		// Titles that don't have a season specified

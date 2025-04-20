@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-const maxIterations = 50
-
 type File struct {
 	ParsedName   string
 	UnparsedName string

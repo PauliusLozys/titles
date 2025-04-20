@@ -5,7 +5,7 @@ import "strings"
 const maxIterations = 50
 
 func cleanUpBrackets(fileName string) string {
-	for i := 0; i < maxIterations; i++ {
+	for range maxIterations {
 		s := strings.IndexRune(fileName, '[')
 		f := strings.IndexRune(fileName, ']')
 		if s == -1 || f == -1 || s > f {
@@ -13,5 +13,6 @@ func cleanUpBrackets(fileName string) string {
 		}
 		fileName = fileName[:s] + fileName[f+1:]
 	}
-	return fileName // should be unreachable
+
+	panic("unreachable")
 }
