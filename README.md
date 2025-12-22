@@ -17,14 +17,16 @@ Doom.Patrol.S02E05.1080p.HEVC.x265-MeGusta[eztv.re].mkv -> OUTPUT_DIR/Doom Patro
 ---
 ## Usage help
 ```
+titles -h
 Usage of titles:
   -b string
         blacklisted directories separated by ','. Example: './dir1,./dir2'
   -d    do a dry run without affecting files
   -e string
-        file extension to look for separated by ',' (default ".mkv,.mp4") 
+        file extension to look for separated by ',' (default ".mkv,.mp4")
   -i string
         input directory (default ".")
+  -m    try to match already existing folder in the output directory using case-insensitive regex (default true)
   -o string
         output directory (default "./output")
   -r    recursively search for all files
@@ -38,4 +40,10 @@ task build
 Build and run
 ```sh
 task run
+```
+---
+## Installing with [Task](https://taskfile.dev/)
+Installing
+```sh
+task install
 ```

@@ -2,6 +2,7 @@ package titles
 
 import (
 	"errors"
+	"log/slog"
 	"regexp"
 	"strconv"
 	"strings"
@@ -60,6 +61,7 @@ func (tp *Parser) ParseTitle(unparsedTitle string) (*Title, error) {
 	episodeStr = strings.Trim(episodeStr, " -e")
 	episodeNum, err := strconv.Atoi(episodeStr)
 	if err != nil { // If no episode was found, default to 1.
+		slog.Warn("could not parse episode number... defaulting to 1", slog.String("title", unparsedTitle))
 		episodeNum = 1
 	}
 

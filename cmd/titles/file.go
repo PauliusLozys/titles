@@ -43,24 +43,31 @@ func collectAllFiles(startDir string, blacklistedDirs, extensions []string, recu
 	return list
 }
 
-func moveFiles(list []File, outputDir string, dryRun bool) {
+func moveFiles(list []File) {
 	organized := make(map[string][]File, len(list))
 	for _, file := range list {
 		organized[file.ParsedName] = append(organized[file.ParsedName], file)
 	}
 
 	for name, files := range organized {
-		showFolder := filepath.Join(outputDir, name)
-		createFolderIfNeeded(showFolder, dryRun) // create folder for show, if needed
+		if *matchExistingFolder {
+			// Try finding an existing folder with similar name (case insensitive).
+			// Avoid creating duplicate folders if something like folder case is different.
+			name = findFolderIfExists(*outputDir, name)
+		}
+
+		showFolder := filepath.Join(*outputDir, name)
+
+		createFolderIfNeeded(showFolder, *dryRun) // create folder for show, if needed
 		for _, file := range files {
 			if file.Season == 0 { // Assume file was unparsed.
 				continue
 			}
 			season := fmt.Sprintf("Season %d", file.Season)
 			seasonFolder := filepath.Join(showFolder, season)
-			createFolderIfNeeded(seasonFolder, dryRun) // create folder for season, if needed
+			createFolderIfNeeded(seasonFolder, *dryRun) // create folder for season, if needed
 			finalPath := filepath.Join(seasonFolder, file.UnparsedName)
-			if !dryRun {
+			if !*dryRun {
 				if err := os.Rename(file.FilePath, finalPath); err != nil {
 					fmt.Println("ERROR: moving files:", err)
 					continue

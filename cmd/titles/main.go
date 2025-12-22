@@ -10,12 +10,13 @@ import (
 )
 
 var (
-	baseDir         = flag.String("i", ".", "input directory")
-	outputDir       = flag.String("o", "./output", "output directory")
-	blacklistedDirs = flag.String("b", "", "blacklisted directories separated by ','. Example: './dir1,./dir2'")
-	extensions      = flag.String("e", ".mkv,.mp4", "file extension to look for separated by ','")
-	recursive       = flag.Bool("r", false, "recursively search for all files")
-	dryRun          = flag.Bool("d", false, "do a dry run without affecting files")
+	baseDir             = flag.String("i", ".", "input directory")
+	outputDir           = flag.String("o", "./output", "output directory")
+	blacklistedDirs     = flag.String("b", "", "blacklisted directories separated by ','. Example: './dir1,./dir2'")
+	extensions          = flag.String("e", ".mkv,.mp4", "file extension to look for separated by ','")
+	recursive           = flag.Bool("r", false, "recursively search for all files")
+	dryRun              = flag.Bool("d", false, "do a dry run without affecting files")
+	matchExistingFolder = flag.Bool("m", true, "try to match already existing folder in the output directory using case-insensitive regex")
 )
 
 func main() {
@@ -57,5 +58,5 @@ func main() {
 		list[i].Season = title.Season
 	}
 
-	moveFiles(list, *outputDir, *dryRun)
+	moveFiles(list)
 }

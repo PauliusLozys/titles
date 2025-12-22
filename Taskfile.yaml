@@ -13,8 +13,8 @@ tasks:
     cmds:
       - echo 'building for {{OS}} {{ARCH}}'
       - golangci-lint run
-      - go build -o="./{{.BINARY_NAME}}" .
+      - go build -o="./cmd/titles/{{.BINARY_NAME}}" ./cmd/titles
     silent: true
   install:
     cmds:
-      - go install
+      - go install ./cmd/titles
