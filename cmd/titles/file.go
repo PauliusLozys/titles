@@ -9,10 +9,10 @@ import (
 )
 
 type File struct {
-	ParsedName   string
-	UnparsedName string
-	FilePath     string
-	Season       int
+	ParsedShowName   string
+	UnparsedShowName string
+	FilePath         string
+	Season           int
 }
 
 func collectAllFiles(startDir string, blacklistedDirs, extensions []string, recursive bool) []File {
@@ -36,8 +36,8 @@ func collectAllFiles(startDir string, blacklistedDirs, extensions []string, recu
 			continue
 		}
 		list = append(list, File{
-			UnparsedName: file.Name(),
-			FilePath:     filepath.Join(startDir, file.Name()),
+			UnparsedShowName: file.Name(),
+			FilePath:         filepath.Join(startDir, file.Name()),
 		})
 	}
 	return list
@@ -46,34 +46,40 @@ func collectAllFiles(startDir string, blacklistedDirs, extensions []string, recu
 func moveFiles(list []File) {
 	organized := make(map[string][]File, len(list))
 	for _, file := range list {
-		organized[file.ParsedName] = append(organized[file.ParsedName], file)
+		organized[file.ParsedShowName] = append(organized[file.ParsedShowName], file)
 	}
 
-	for name, files := range organized {
+	for showName, episodes := range organized {
+		var foundExistingFolder bool
 		if *matchExistingFolder {
 			// Try finding an existing folder with similar name (case insensitive).
 			// Avoid creating duplicate folders if something like folder case is different.
-			name = findFolderIfExists(*outputDir, name)
+			showName, foundExistingFolder = findFolderIfExists(*outputDir, showName)
 		}
 
-		showFolder := filepath.Join(*outputDir, name)
-
-		createFolderIfNeeded(showFolder, *dryRun) // create folder for show, if needed
-		for _, file := range files {
-			if file.Season == 0 { // Assume file was unparsed.
+		showFolder := filepath.Join(*outputDir, showName)
+		for _, episode := range episodes {
+			if episode.Season == 0 { // Assume file was unparsed.
+				fmt.Println("ERROR: Unparsed file, skipping:", episode.UnparsedShowName)
 				continue
 			}
-			season := fmt.Sprintf("Season %d", file.Season)
-			seasonFolder := filepath.Join(showFolder, season)
-			createFolderIfNeeded(seasonFolder, *dryRun) // create folder for season, if needed
-			finalPath := filepath.Join(seasonFolder, file.UnparsedName)
+
+			seasonFolder := filepath.Join(showFolder, fmt.Sprintf("Season %d", episode.Season))
+			createFolderIfNeeded(seasonFolder, *dryRun) // create folder for show/season, if needed
+			finalPath := filepath.Join(seasonFolder, episode.UnparsedShowName)
+
 			if !*dryRun {
-				if err := os.Rename(file.FilePath, finalPath); err != nil {
+				if err := os.Rename(episode.FilePath, finalPath); err != nil {
 					fmt.Println("ERROR: moving files:", err)
 					continue
 				}
 			}
-			fmt.Println("Moved to:", finalPath)
+
+			if foundExistingFolder {
+				fmt.Println("Moved to existing folder:", finalPath)
+			} else {
+				fmt.Println("Moved to a new folder:", finalPath)
+			}
 		}
 	}
 }

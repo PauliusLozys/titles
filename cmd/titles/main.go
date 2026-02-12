@@ -37,24 +37,24 @@ func main() {
 	parser := titles.NewParser()
 
 	for i := range list {
-		if !titles.DefaultTitleRegex.MatchString(list[i].UnparsedName) {
-			slog.Warn("Unmatched file", slog.String("file", list[i].UnparsedName))
+		if !titles.DefaultTitleRegex.MatchString(list[i].UnparsedShowName) {
+			slog.Warn("Unmatched file", slog.String("file", list[i].UnparsedShowName))
 
 			continue
 		}
 
-		title, err := parser.ParseTitle(list[i].UnparsedName)
+		title, err := parser.ParseTitle(list[i].UnparsedShowName)
 		if err != nil {
 			slog.Error(
 				"Parsing title",
-				slog.String("title", list[i].UnparsedName),
+				slog.String("title", list[i].UnparsedShowName),
 				slog.Any("err", err),
 			)
 
 			continue
 		}
 
-		list[i].ParsedName = title.Name
+		list[i].ParsedShowName = title.Name
 		list[i].Season = title.Season
 	}
 

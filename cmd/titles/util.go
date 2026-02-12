@@ -30,11 +30,11 @@ func createFolderIfNeeded(path string, dryRun bool) {
 	}
 }
 
-func findFolderIfExists(outputDir, name string) string {
+func findFolderIfExists(outputDir, name string) (string, bool) {
 	dirs, err := os.ReadDir(outputDir)
 	if err != nil {
 		slog.Error("could not read output directory", slog.String("dir", outputDir), slog.Any("err", err))
-		return name
+		return name, false
 	}
 
 	for _, dir := range dirs {
@@ -45,13 +45,13 @@ func findFolderIfExists(outputDir, name string) string {
 		matched, err := regexp.MatchString("(?i)"+dir.Name(), name)
 		if err != nil {
 			slog.Error("matching directory", slog.String("pattern", name), slog.String("matching string", dir.Name()), slog.Any("err", err))
-			return name
+			return name, false
 		}
 
 		if matched {
-			return dir.Name()
+			return dir.Name(), true
 		}
 	}
 
-	return name
+	return name, false
 }

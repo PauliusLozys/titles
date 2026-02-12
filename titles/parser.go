@@ -14,12 +14,12 @@ import (
 // Default configurations.
 var (
 	DefaultTitleCase    = cases.Title(language.English)
-	DefaultTitleRegex   = regexp.MustCompile(`( .+\s?-\s?\d+|.+[sS]\d+([eE]\d{1,2}))|.+[sS]\d+`)
-	DefaultSeasonRegex  = regexp.MustCompile(`((([sS]eason\s)|[sS])\d+|\d+([NnRr]d) [sS]eason)`)
+	DefaultTitleRegex   = regexp.MustCompile(`(.+\s?-\s?\d+|.+[sS]\d+([eE]\d{1,2}))|.+[sS]\d+`)
+	DefaultSeasonRegex  = regexp.MustCompile(`((([sS]eason\s)|[sS])\d+|\d+([NnRr]d|[Tt]h) [sS]eason)`)
 	DefaultEpisodeRegex = regexp.MustCompile(`(\s?-\s?\d+|[eE]\d+)`)
 	DefaultQualityRegex = regexp.MustCompile(`(1080|720|480)p`)
 	DefaultReplacer     = strings.NewReplacer(".", " ", "_", " ", "-", " ")
-	SeasonReplacer      = strings.NewReplacer("nd", "", "rd", "", "season", "", " ", "")
+	SeasonReplacer      = strings.NewReplacer("nd", "", "rd", "", "th", "", "season", "", " ", "")
 )
 
 type Parser struct {
@@ -68,18 +68,20 @@ func (tp *Parser) ParseTitle(unparsedTitle string) (*Title, error) {
 	// Extract season number.
 	sea := tp.seasonRegex.FindString(title) // Extracted: S1E01/S1/Season 1/2nd Season
 	seasonStr := strings.ToLower(sea)
-	if strings.Contains(seasonStr, "nd season") || strings.Contains(seasonStr, "rd season") { // Example: 2nd /3rd Season.
+
+	switch {
+	case strings.Contains(seasonStr, "nd season"), strings.Contains(seasonStr, "rd season"), strings.Contains(seasonStr, "th season"): // Example: 2nd/3rd/4th Season.
 		seasonStr = tp.seasonReplacer.Replace(seasonStr)
-	} else if strings.Contains(seasonStr, "season") { // Example: season 1
+	case strings.Contains(seasonStr, "season"): // Example: season 1
 		seasonStr = strings.TrimSpace(strings.TrimPrefix(seasonStr, "season"))
-	} else if strings.TrimSpace(seasonStr) == "" { // no season
+	case strings.TrimSpace(seasonStr) == "": // no season
 		// Titles that don't have a season specified
 		// will default to 1. This is usually related to anime episodes.
 		seasonStr = "1"
-
-	} else { // Example: s1
+	default: // Example: s1
 		seasonStr = strings.TrimPrefix(seasonStr, "s")
 	}
+
 	seasonNum, err := strconv.Atoi(seasonStr)
 	if err != nil {
 		return nil, err

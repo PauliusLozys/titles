@@ -51,6 +51,10 @@ func TestParseFile(t *testing.T) {
 			unparsedTitle: "[Erai-raws] Kusuriya no Hitorigoto 2nd Season - 10 [1080p CR WEBRip HEVC EAC3][MultiSub][1F850592].mkv",
 			expected:      &titles.Title{Name: "Kusuriya No Hitorigoto", Season: 2, Episode: 10, Quality: "1080p"},
 		},
+		{
+			unparsedTitle: "Test Show 4th Season - 999.mkv",
+			expected:      &titles.Title{Name: "Test Show", Season: 4, Episode: 999},
+		},
 	}
 
 	parser := titles.NewParser()
