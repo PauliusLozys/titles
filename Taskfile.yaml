@@ -2,19 +2,20 @@ version: "3"
 
 vars:
   BINARY_NAME: titles{{exeExt}}
+  LD_FLAGS: "-X main.COMMIT=$(git rev-parse HEAD) -X main.BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 tasks:
   run:
     cmds:
       - task: build
-      - ./{{.BINARY_NAME}}
+      - ./cmd/titles/{{.BINARY_NAME}}
     silent: true
   build:
     cmds:
       - echo 'building for {{OS}} {{ARCH}}'
       - golangci-lint run
-      - go build -o="./cmd/titles/{{.BINARY_NAME}}" ./cmd/titles
+      - go build -ldflags "{{.LD_FLAGS}}" -o="./cmd/titles/{{.BINARY_NAME}}" ./cmd/titles
     silent: true
   install:
     cmds:
-      - go install ./cmd/titles
+      - go install -ldflags "{{.LD_FLAGS}}" ./cmd/titles

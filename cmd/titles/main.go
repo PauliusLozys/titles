@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"strings"
@@ -17,10 +18,19 @@ var (
 	recursive           = flag.Bool("r", false, "recursively search for all files")
 	dryRun              = flag.Bool("d", false, "do a dry run without affecting files")
 	matchExistingFolder = flag.Bool("m", true, "try to match already existing folder in the output directory using case-insensitive regex")
+	version             = flag.Bool("v", false, "print version and exit")
+
+	COMMIT     = "" // Set at build time using -ldflags "-X main.COMMIT=$(git rev-parse HEAD)"
+	BUILD_TIME = "" // Set at build time using -ldflags "-X main.BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 )
 
 func main() {
 	flag.Parse()
+
+	if *version {
+		fmt.Printf("Commit: %s\nBuild Time: %s\n", COMMIT, BUILD_TIME)
+		return
+	}
 
 	list := collectAllFiles(
 		*baseDir,
